@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>เว็บเม็คเฟรนตามคณะ</title>
+  
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+}
+
+h1 {
+  text-align: center;
+  padding: 20px;
+  animation: wiggle 2s infinite ease-in-out;
+}
+
+@keyframes wiggle {
+  0% { transform: translateY(0px); }
+  25% { transform: translateY(-2px); }
+  50% { transform: translateY(0px); }
+  75% { transform: translateY(2px); }
+  100% { transform: translateY(0px); }
+}
+
+.wiggle-text {
+  display: inline-block;
+  animation: wiggle 2s infinite ease-in-out;
+}
+
+
+  
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.hidden { display: none; }
+
+button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+  background: #4CAF50;
+  color: white;
+}
+
+.back-btn { background: #555; }
+
+textarea {
+  width: 80%;
+  height: 80px;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 15px;
+}
+
+input[type="file"] {
+  margin-top: 10px;
+}
+
+.post {
+  background: white;
+  margin: 10px auto;
+  padding: 15px;
+  width: 70%;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  animation: floatUp 0.5s ease;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.post img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  color: #333;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌟 เว็บเม็คเฟรนเเต่ละคณะ 🌟</h1>
+  
+
+<div id="facultySection" class="grid"></div>
+<div id="majorSection" class="grid hidden"></div>
+<div id="makeFriendSection" class="hidden" style="text-align:center; padding:40px;"></div>
+
+<footer>
+*เว็บไซต์นี้สร้างจากนิสิตในรายวิชาการคิดเชิงออกแบบ
+</footer>
+
+<script>
+
+const data = {
+  "คณะมนุษยศาสตร์และสังคมศาสตร์": ["ภาษาไทย","ภาษาอังกฤษ","ภาษาจีน","ภาษาญี่ปุ่น","ประวัติศาสตร์","การพัฒนาชุมชน","สังคมวิทยาและมานุษยวิทยา","รัฐประศาสนศาสตร์ (บางหลักสูตร)"],
+  "คณะศึกษาศาสตร์": ["การสอนภาษาไทย","การสอนภาษาอังกฤษ","การสอนคณิตศาสตร์","การสอนวิทยาศาสตร์","การศึกษาปฐมวัย","พลศึกษา","จิตวิทยาการศึกษา"],
+  "คณะวิทยาศาสตร์": ["คณิตศาสตร์","ฟิสิกส์","เคมี","ชีววิทยา","จุลชีววิทยา","วิทยาการคอมพิวเตอร์","เทคโนโลยีชีวภาพ"],
+  "คณะวิศวกรรมศาสตร์": ["วิศวกรรมโยธา","วิศวกรรมเครื่องกล","วิศวกรรมไฟฟ้า","วิศวกรรมอุตสาหการ","วิศวกรรมคอมพิวเตอร์"],
+  "คณะเทคโนโลยี": ["เทคโนโลยีอาหาร","เทคโนโลยีการเกษตร","เทคโนโลยีชีวภาพ (ประยุกต์)"],
+  "คณะสถาปัตยกรรมศาสตร์ ผังเมือง และนฤมิตศิลป์": ["สถาปัตยกรรม","ผังเมือง","การออกแบบภายใน","นิเทศศิลป์","ออกแบบผลิตภัณฑ์"],
+  "คณะวิทยาการสารสนเทศ": ["เทคโนโลยีสารสนเทศ (IT)","สารสนเทศศาสตร์","นิเทศศาสตร์","สื่อดิจิทัล"],
+  "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์": ["สิ่งแวดล้อมศึกษา","การจัดการทรัพยากรธรรมชาติ","เทคโนโลยีสิ่งแวดล้อม"],
+  "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์": ["ดุริยางคศิลป์","นาฏศิลป์","ทัศนศิลป์","วัฒนธรรมศึกษา"],
+  "คณะการบัญชีและการจัดการ": ["การบัญชี","การเงิน","การตลาด","การจัดการ","ธุรกิจระหว่างประเทศ"],
+  "คณะนิติศาสตร์": ["นิติศาสตร์"],
+  "คณะการท่องเที่ยวและการโรงแรม": ["การท่องเที่ยว","การโรงแรม"],
+  "วิทยาลัยการเมืองการปกครอง": ["รัฐศาสตร์","รัฐประศาสนศาสตร์","ความสัมพันธ์ระหว่างประเทศ"],
+  "คณะแพทยศาสตร์": ["แพทยศาสตรบัณฑิต"],
+  "คณะเภสัชศาสตร์": ["เภสัชศาสตรบัณฑิต"],
+  "คณะพยาบาลศาสตร์": ["พยาบาลศาสตรบัณฑิต"],
+  "คณะสาธารณสุขศาสตร์": ["สาธารณสุขศาสตร์","อาชีวอนามัยและความปลอดภัย"],
+  "คณะสัตวแพทยศาสตร์": ["สัตวแพทยศาสตรบัณฑิต"]
+};
+
+const facultySection = document.getElementById("facultySection");
+const majorSection = document.getElementById("majorSection");
+const makeFriendSection = document.getElementById("makeFriendSection");
+
+let currentMajor = "";
+
+function showFaculties() {
+  facultySection.innerHTML = "";
+  majorSection.classList.add("hidden");
+  makeFriendSection.classList.add("hidden");
+  facultySection.classList.remove("hidden");
+
+  for (let faculty in data) {
+    const div = document.createElement("div");
+    div.className = "card wiggle-text";
+    div.innerText = faculty;
+    div.onclick = () => showMajors(faculty);
+    facultySection.appendChild(div);
+  }
+}
+
+function showMajors(faculty) {
+  facultySection.classList.add("hidden");
+  majorSection.classList.remove("hidden");
+  majorSection.innerHTML = "";
+
+  data[faculty].forEach(major => {
+    const div = document.createElement("div");
+    div.className = "card wiggle-text";
+    div.innerText = major;
+    div.onclick = () => showMakeFriend(major);
+    majorSection.appendChild(div);
+  });
+
+  const backBtn = document.createElement("button");
+  backBtn.innerText = "ย้อนกลับ";
+  backBtn.className = "back-btn";
+  backBtn.onclick = showFaculties;
+  majorSection.appendChild(backBtn);
+}
+
+function showMakeFriend(major) {
+  currentMajor = major;
+
+  majorSection.classList.add("hidden");
+  makeFriendSection.classList.remove("hidden");
+  makeFriendSection.innerHTML = `
+    <h2 class="wiggle-text">${major}</h2>
+    <p>เขียนแนะนำตัวหรือหาเพื่อนได้เลย*สามารถเพิ่มรูปหน้าตัวเองได้ 🎉</p>
+    <textarea id="userText" placeholder="พิมพ์ข้อความของคุณที่นี่..."></textarea><br>
+    <input type="file" id="userImage" accept="image/*"><br>
+    <button onclick="postMessage()">โพสต์ข้อความ</button>
+    <div id="posts"></div>
+    <br>
+    <button class="back-btn" onclick="showFaculties()">กลับหน้าหลัก</button>
+  `;
+
+  loadPosts();
+}
+
+function postMessage() {
+  const text = document.getElementById("userText").value;
+  const imageInput = document.getElementById("userImage");
+
+  if (text.trim() === "") return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    const newPost = {
+      text: text,
+      image: imageInput.files.length > 0 ? e.target.result : null
+    };
+
+    let posts = JSON.parse(localStorage.getItem(currentMajor)) || [];
+    posts.push(newPost);
+    localStorage.setItem(currentMajor, JSON.stringify(posts));
+
+    document.getElementById("userText").value = "";
+    imageInput.value = "";
+
+    loadPosts();
+  };
+
+  if (imageInput.files.length > 0) {
+    reader.readAsDataURL(imageInput.files[0]);
+  } else {
+    reader.onload({ target:{ result:null } });
+  }
+}
+
+function loadPosts() {
+  const postsDiv = document.getElementById("posts");
+  if (!postsDiv) return;
+
+  postsDiv.innerHTML = "";
+
+  let posts = JSON.parse(localStorage.getItem(currentMajor)) || [];
+
+  posts.forEach(post => {
+    const postDiv = document.createElement("div");
+    postDiv.className = "post";
+
+    if (post.image) {
+      const img = document.createElement("img");
+      img.src = post.image;
+      postDiv.appendChild(img);
+    }
+
+    const textDiv = document.createElement("div");
+    textDiv.innerText = post.text;
+    postDiv.appendChild(textDiv);
+
+    postsDiv.prepend(postDiv);
+  });
+}
+
+showFaculties();
+
+</script>
+</body>
+</html>
